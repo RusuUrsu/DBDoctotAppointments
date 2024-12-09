@@ -1,0 +1,29 @@
+<hibernate-configuration>
+    <session-factory>
+        <!-- Database connection settings -->
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/DoctorAppointments</property>
+        <property name="hibernate.connection.username">postgres</property>
+        <property name="hibernate.connection.password">a</property>
+
+        <!-- Hibernate properties -->
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
+
+        <!-- Specify the package containing annotated classes -->
+        <mapping package="org.example.model"/>
+        <mapping class="org.example.model.Doctor"/>
+        <mapping class="org.example.model.Appointment"/>
+        <mapping class="org.example.model.Clinic"/>
+        <mapping class="org.example.model.Medication"/>
+        <mapping class="org.example.model.Patient"/>
+        <mapping class="org.example.model.Specialization"/>
+
+        <property name="hibernate.current_session_context_class">jta</property>
+
+
+
+    </session-factory>
+</hibernate-configuration>
