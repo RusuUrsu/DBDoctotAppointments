@@ -7,28 +7,28 @@ import java.io.Serializable;
 @Table(name = "doctors")
 public class Doctor extends Person implements Serializable {
 
-    @ManyToOne
-    @JoinColumn(name = "specialization_id", nullable = true)
-    private Specialization specialization;
+    @Column(name = "specialization", nullable = true)
+    private String specialization;
 
     @ManyToOne
-    @JoinColumn(name = "clinic_id")
+    @JoinColumn(name = "clinic_id", nullable = true)
     private Clinic clinic;
 
     public Doctor() {
         // Default constructor required by JPA
     }
 
-    public Doctor(String firstName, String lastName, Specialization specialization) {
+    public Doctor(Clinic clinic, String firstName, String lastName, String specialization) {
         super(firstName, lastName);
         this.specialization = specialization;
+        this.clinic = clinic;
     }
 
-    public Specialization getSpecialization() {
+    public String getSpecialization() {
         return specialization;
     }
 
-    public void setSpecialization(Specialization specialization) {
+    public void setSpecialization(String specialization) {
         this.specialization = specialization;
     }
 
@@ -45,7 +45,9 @@ public class Doctor extends Person implements Serializable {
         return "Doctor: " +
                 "First Name: " + getFirstName() +
                 " | Last Name: " + getLastName() +
-                " | Specialization: " + specialization.getName() + " - Description: " + specialization.getDescription() +
-                " | ID: " + getId();
+                " | Specialization: " + specialization +
+                " | ID: " + getId() +
+                " | Clinic: " + clinic.getName();
+
     }
 }

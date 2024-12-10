@@ -16,7 +16,7 @@ public class Clinic extends Identifiable implements Serializable {
     @Column(name = "address", nullable = true)
     private String address;
 
-    @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Doctor> listOfDoctors = new ArrayList<>();
 
     public Clinic() {

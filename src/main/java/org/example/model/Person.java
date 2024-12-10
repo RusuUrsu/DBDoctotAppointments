@@ -6,10 +6,10 @@ import java.io.Serializable;
 @MappedSuperclass
 public abstract class Person extends Identifiable implements Serializable {
 
-    @Column(name = "first_name", nullable = true)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "last_name", nullable = true)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
     @Override

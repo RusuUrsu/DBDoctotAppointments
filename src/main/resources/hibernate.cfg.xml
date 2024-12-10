@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <hibernate-configuration>
     <session-factory>
         <!-- Database connection settings -->
@@ -6,24 +7,34 @@
         <property name="hibernate.connection.username">postgres</property>
         <property name="hibernate.connection.password">a</property>
 
+        <!-- JDBC connection pool settings (optional) -->
+        <!-- <property name="hibernate.c3p0.min_size">5</property>
+        <property name="hibernate.c3p0.max_size">20</property>
+        <property name="hibernate.c3p0.timeout">300</property>
+        <property name="hibernate.c3p0.max_statements">50</property>
+        <property name="hibernate.c3p0.idle_test_period">3000</property> -->
+
         <!-- Hibernate properties -->
         <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
-        <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="hibernate.hbm2ddl.auto">create-drop</property> <!-- Can be 'validate', 'create', 'create-drop' depending on your needs -->
+        <property name="hibernate.jdbc.time_zone">UTC</property> <!-- Optional: set timezone to UTC if needed -->
 
-        <!-- Specify the package containing annotated classes -->
-        <mapping package="org.example.model"/>
+        <!-- Enable automatic session context management (recommended for most cases) -->
+        <property name="hibernate.current_session_context_class">thread</property>
+
+        <!-- Enable 2nd level cache (optional) -->
+        <!-- <property name="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCacheProvider</property> -->
+
+        <!-- Specify the package containing annotated entity classes -->
+        <!-- Specify individual entity classes here if necessary -->
         <mapping class="org.example.model.Doctor"/>
         <mapping class="org.example.model.Appointment"/>
         <mapping class="org.example.model.Clinic"/>
         <mapping class="org.example.model.Medication"/>
         <mapping class="org.example.model.Patient"/>
         <mapping class="org.example.model.Specialization"/>
-
-        <property name="hibernate.current_session_context_class">jta</property>
-
-
 
     </session-factory>
 </hibernate-configuration>

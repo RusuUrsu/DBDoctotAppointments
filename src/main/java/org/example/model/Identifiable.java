@@ -16,4 +16,8 @@ public abstract class Identifiable implements Serializable {
     public Integer getId() {
         return id;
     }
+
+    public void setId(int andIncrement) {
+        this.id = andIncrement;
+    }
 }
