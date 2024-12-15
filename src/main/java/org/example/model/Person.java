@@ -21,7 +21,7 @@ public abstract class Person extends Identifiable implements Serializable {
     }
 
     public Person(String firstName, String lastName) {
-        super();
+        //super();
         this.firstName = firstName;
         this.lastName = lastName;
     }

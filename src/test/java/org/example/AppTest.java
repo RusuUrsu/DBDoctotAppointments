@@ -35,6 +35,21 @@ public class AppTest {
     @BeforeAll
     static void setUpSessionFactory() {
         sessionFactory = HibernateUtil.getSessionFactory();
+//        patientRepo = new DBRepo<>(sessionFactory, Patient.class);
+//        doctorRepo = new DBRepo<>(sessionFactory, Doctor.class);
+//        appointmentRepo = new DBRepo<>(sessionFactory, Appointment.class);
+//        clinicRepo = new DBRepo<>(sessionFactory, Clinic.class);
+//        specializationRepo = new DBRepo<>(sessionFactory, Specialization.class);
+//        medicationRepo = new DBRepo<>(sessionFactory, Medication.class);
+//
+//        service = new Service(appointmentRepo, doctorRepo, patientRepo, clinicRepo, medicationRepo, specializationRepo);
+//        controller = new Controller(service);
+    }
+
+
+    @BeforeEach
+    void setUpRepository() {
+        sessionFactory = HibernateUtil.getSessionFactory();
         patientRepo = new DBRepo<>(sessionFactory, Patient.class);
         doctorRepo = new DBRepo<>(sessionFactory, Doctor.class);
         appointmentRepo = new DBRepo<>(sessionFactory, Appointment.class);
@@ -46,19 +61,6 @@ public class AppTest {
         controller = new Controller(service);
     }
 
-//    @BeforeEach
-//    void setUpRepository() {
-//        patientRepo = new DBRepo<>(sessionFactory, Patient.class);
-//        doctorRepo = new DBRepo<>(sessionFactory, Doctor.class);
-//        appointmentRepo = new DBRepo<>(sessionFactory, Appointment.class);
-//        clinicRepo = new DBRepo<>(sessionFactory, Clinic.class);
-//        specializationRepo = new DBRepo<>(sessionFactory, Specialization.class);
-//        medicationRepo = new DBRepo<>(sessionFactory, Medication.class);
-//
-//        service = new Service(appointmentRepo, doctorRepo, patientRepo, clinicRepo, medicationRepo, specializationRepo);
-//        controller = new Controller(service);
-//    }
-
     @Test
     void testOperationsForDoctor() {
 //        Session session = sessionFactory.openSession();
@@ -68,7 +70,9 @@ public class AppTest {
         Clinic clinic = new Clinic("Medica", "123 Main Street");
         clinicRepo.create(clinic);
         Doctor doctor = new Doctor(clinic, "Maria", "Popescu", "Ginecolog");
+        System.out.println(doctor);
         doctorRepo.create(doctor);
+        System.out.println(doctor);
 //        transaction.commit();
 
         // Verify the doctor ID
@@ -76,6 +80,8 @@ public class AppTest {
         assertNotNull(doctorId, "Doctor ID should not be null");
 
         // Retrieve and verify the saved doctor
+        System.out.println(doctorRepo.getAll());
+        System.out.println(doctor);
         Doctor retrievedDoctor = doctorRepo.read(doctorId);
         assertNotNull(retrievedDoctor, "Retrieved Doctor should not be null");
         assertEquals("Maria", retrievedDoctor.getFirstName());

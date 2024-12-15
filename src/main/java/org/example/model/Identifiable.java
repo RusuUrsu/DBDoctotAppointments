@@ -8,14 +8,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 @MappedSuperclass
 public abstract class Identifiable implements Serializable {
     private static final long serialVersionUID = 1L;
-    private final AtomicInteger idGenerator = new AtomicInteger(1);
+    private static final AtomicInteger idGenerator = new AtomicInteger(1);
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false)
     protected Integer id;
 
     public Identifiable() {
-        this.id = idGenerator.getAndIncrement();
+        //this.setId(idGenerator.getAndIncrement());
     }
 
     public Integer getId() {

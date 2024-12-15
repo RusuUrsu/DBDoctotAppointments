@@ -11,7 +11,7 @@ public class Appointment extends Identifiable implements Serializable {
     @Column(name = "date_time", nullable = true)
     private LocalDateTime dateTime;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, optional = true)
     @JoinColumn(name = "patient_id", nullable = true)
     private Patient patient;
 
