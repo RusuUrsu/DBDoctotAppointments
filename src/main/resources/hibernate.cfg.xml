@@ -16,7 +16,7 @@
 
         <!-- Hibernate properties -->
         <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
-        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.show_sql">false</property>
         <property name="hibernate.format_sql">true</property>
         <property name="hibernate.hbm2ddl.auto">create-drop</property> <!-- Can be 'validate', 'create', 'create-drop' depending on your needs -->
         <property name="hibernate.jdbc.time_zone">UTC</property> <!-- Optional: set timezone to UTC if needed -->

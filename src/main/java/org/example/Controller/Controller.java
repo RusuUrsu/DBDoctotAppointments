@@ -135,9 +135,9 @@ public class Controller {
         return service.getClinics().values().stream().toList();
     }
 
-    public List<Doctor> getDoctorsSortedBySpecialization(String specializationName) {
-        return service.filterDoctorsBySpecialization(specializationName);
-    }
+//    public List<Doctor> getDoctorsSortedBySpecialization(String specializationName) {
+//        return service.filterDoctorsBySpecialization(specializationName);
+//    }
 
 
 

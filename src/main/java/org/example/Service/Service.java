@@ -2,21 +2,14 @@ package org.example.Service;
 
 import org.example.model.*;
 import org.example.Repository.IRepository;
-import org.example.Repository.IRepository;
+import org.example.Exceptions.*; // Import your custom exceptions
 
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 import java.util.stream.Collectors;
-
 
 public class Service {
     private final IRepository<Appointment> appointmentRepository;
@@ -33,162 +26,405 @@ public class Service {
         this.clinicRepository = clinicRepository;
         this.medicationRepository = medicationRepository;
         this.specializationRepository = specializationRepository;
-        //addSomeValues();
-    }
-
-    public void addSomeValues() {
-        Clinic clinic1 = new Clinic("Nova Clinic", "Str. T. Vladimirescu 19");
-        Clinic clinic2 = new Clinic("Medica", "Str. Mircea Eliade 33");
-        Clinic clinic3 = new Clinic("Regina Maria", "Str. Eugen Ionescu 32-37");
-        clinicRepository.create(clinic1);
-        clinicRepository.create(clinic2);
-        clinicRepository.create(clinic3);
-
-        Specialization specialization1 = new Specialization("ginecolog", "opens legs");
-        Specialization specialization2 = new Specialization("oftalmolog", "opens eyes");
-        Specialization specialization3 = new Specialization("dentist", "opens mouths");
-        specializationRepository.create(specialization1);
-        specializationRepository.create(specialization2);
-        specializationRepository.create(specialization3);
-
-//        Doctor doctor1 = new Doctor("Victor", "Rusu", specialization1);
-//        Doctor doctor2 = new Doctor("Tudor", "Ivancea", specialization2);
-//        Doctor doctor3 = new Doctor("Alex", "Luca", specialization3);
-//        addDoctor(doctor1);
-//        addDoctor(doctor2);
-//        addDoctor(doctor3);
-
-        Patient patient0 = new Patient("Alexandra", "Bercu", new ContactInfo("0725896874","bercualexandra@gmail.com" ,"Strada Narciselor 4"));
-        Patient patient1 = new Patient("Ion", "Popescu", new ContactInfo("0723000001", "ion.popescu@gmail.com", "Strada Unirii 10"));
-        Patient patient2 = new Patient("Maria", "Ionescu", new ContactInfo("0732000002", "maria.ionescu@gmail.com", "Strada Libertății 5"));
-        Patient patient3 = new Patient("George", "Vasilescu", new ContactInfo("0743000003", "george.vasilescu@gmail.com", "Strada Păcii 20"));
-        Patient patient4 = new Patient("Ana", "Dumitrescu", new ContactInfo("0753000004", "ana.dumitrescu@gmail.com", "Strada Primăverii 12"));
-        Patient patient5 = new Patient("Alex", "Mateescu", new ContactInfo("0763000005", "alex.mateescu@gmail.com", "Bulevardul Florilor 15"));
-        addPatient(patient0);
-        addPatient(patient1);
-        addPatient(patient2);
-        addPatient(patient3);
-        addPatient(patient4);
-        addPatient(patient5);
     }
 
     public void addAppointment(Appointment appointment) {
-        appointmentRepository.create(appointment);
+        try {
+            appointmentRepository.create(appointment);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to add appointment: " + e.getMessage());
+        }
     }
 
     public void removeAppointment(Appointment appointment) {
-        appointmentRepository.delete(appointment.getId());
+        if (appointment == null) {
+            throw new EntityNotFoundException("Appointment not found.");
+        }
+        try {
+            appointmentRepository.delete(appointment.getId());
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to remove appointment: " + e.getMessage());
+        }
     }
 
     public void addClinic(Clinic clinic) {
-        clinicRepository.create(clinic);
+        if (clinic == null) {
+            throw new ValidationException("Clinic cannot be null.");
+        }
+        try {
+            clinicRepository.create(clinic);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to add clinic: " + e.getMessage());
+        }
     }
 
     public void removeClinic(Clinic clinic) {
-        clinicRepository.delete(clinic.getId());
+        if (clinic == null) {
+            throw new EntityNotFoundException("Clinic not found.");
+        }
+        try {
+            clinicRepository.delete(clinic.getId());
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to remove clinic: " + e.getMessage());
+        }
     }
 
     public void addMedication(Medication medication) {
-        medicationRepository.create(medication);
-    }
-    public void removeMedication(Medication medication) {
-        medicationRepository.delete(medication.getId());
+        if (medication == null) {
+            throw new ValidationException("Medication cannot be null.");
+        }
+        try {
+            medicationRepository.create(medication);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to add medication: " + e.getMessage());
+        }
     }
 
-    public void addSpecialization(Specialization specialization) {
-        specializationRepository.create(specialization);
-    }
-    public void removeSpecialization(Specialization specialization) {
-        specializationRepository.delete(specialization.getId());
+    public void removeMedication(Medication medication) {
+        if (medication == null) {
+            throw new EntityNotFoundException("Medication not found.");
+        }
+        try {
+            medicationRepository.delete(medication.getId());
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to remove medication: " + e.getMessage());
+        }
     }
 
     public void updateAppointment(Appointment appointment) {
-        appointmentRepository.update(appointment);
+        if (appointment == null) {
+            throw new ValidationException("Appointment cannot be null.");
+        }
+        try {
+            appointmentRepository.update(appointment);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to update appointment: " + e.getMessage());
+        }
+    }
+
+    public Clinic getClinicById(int id) {
+        try {
+            Clinic clinic = clinicRepository.getById(id);
+            if (clinic == null) {
+                throw new EntityNotFoundException("Clinic with ID " + id + " not found.");
+            }
+            return clinic;
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to retrieve clinic: " + e.getMessage());
+        }
+    }
+
+    public Doctor getDoctorById(int id) {
+        try {
+            Doctor doctor = doctorRepository.getById(id);
+            if (doctor == null) {
+                throw new EntityNotFoundException("Doctor with ID " + id + " not found.");
+            }
+            return doctor;
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to retrieve doctor: " + e.getMessage());
+        }
+    }
+
+    public boolean createAppointment(Patient patient, Doctor doctor, String dateTime, String reason) {
+        if (patient == null || doctor == null || dateTime == null || reason == null) {
+            throw new ValidationException("Invalid input for creating an appointment.");
+        }
+        try {
+            LocalDateTime appointmentTime = LocalDateTime.parse(dateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            Appointment appointment = new Appointment(appointmentTime, patient, doctor, reason);
+            addAppointment(appointment);
+            return true;
+        } catch (DateTimeParseException e) {
+            throw new ValidationException("Invalid date format: " + dateTime);
+        } catch (Exception e) {
+            throw new BusinessLogicException("Error creating appointment: " + e.getMessage());
+        }
+    }
+
+    public List<Appointment> filterAppointmentsByDate(LocalDate date) {
+        if (date == null) {
+            throw new ValidationException("Date cannot be null.");
+        }
+        try {
+            return appointmentRepository.getAll().values().stream()
+                    .filter(appointment -> LocalDateTime.parse(appointment.getDateTime(), DateTimeFormatter.ISO_LOCAL_DATE_TIME).toLocalDate().equals(date))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new BusinessLogicException("Error filtering appointments: " + e.getMessage());
+        }
+    }
+
+    public List<Appointment> sortAppointmentsByDate(boolean ascending) {
+        try {
+            return appointmentRepository.getAll().values().stream()
+                    .sorted(ascending
+                            ? Comparator.comparing(Appointment::getDateTime)
+                            : Comparator.comparing(Appointment::getDateTime).reversed())
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new BusinessLogicException("Error sorting appointments: " + e.getMessage());
+        }
     }
 
     public void updateClinic(Clinic clinic) {
-        clinicRepository.update(clinic);
+        if (clinic == null) {
+            throw new ValidationException("Clinic cannot be null.");
+        }
+        try {
+            clinicRepository.update(clinic);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to update clinic: " + e.getMessage());
+        }
     }
 
     public void updateMedication(Medication medication) {
-        medicationRepository.update(medication);
-    }
-    public void updateSpecialization(Specialization specialization) {
-        specializationRepository.update(specialization);
+        if (medication == null) {
+            throw new ValidationException("Medication cannot be null.");
+        }
+        try {
+            medicationRepository.update(medication);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to update medication: " + e.getMessage());
+        }
     }
 
     public void addDoctor(Doctor doctor) {
-        doctorRepository.create(doctor);
+        if (doctor == null) {
+            throw new ValidationException("Doctor cannot be null.");
+        }
+        try {
+            doctorRepository.create(doctor);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to add doctor: " + e.getMessage());
+        }
     }
 
     public void removeDoctor(Doctor doctor) {
-        doctorRepository.delete(doctor.getId());
+        if (doctor == null) {
+            throw new EntityNotFoundException("Doctor not found.");
+        }
+        try {
+            doctorRepository.delete(doctor.getId());
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to remove doctor: " + e.getMessage());
+        }
     }
 
     public void addPatient(Patient patient) {
-        patientRepository.create(patient);
+        if (patient == null) {
+            throw new ValidationException("Patient cannot be null.");
+        }
+        try {
+            patientRepository.create(patient);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to add patient: " + e.getMessage());
+        }
     }
+
     public void removePatient(Patient patient) {
-        patientRepository.delete(patient.getId());
+        if (patient == null) {
+            throw new EntityNotFoundException("Patient not found.");
+        }
+        try {
+            patientRepository.delete(patient.getId());
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to remove patient: " + e.getMessage());
+        }
     }
 
     public void updateDoctor(Doctor doctor) {
-        doctorRepository.update(doctor);
+        if (doctor == null) {
+            throw new ValidationException("Doctor cannot be null.");
+        }
+        try {
+            doctorRepository.update(doctor);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to update doctor: " + e.getMessage());
+        }
     }
+
     public void updatePatient(Patient patient) {
-        patientRepository.update(patient);
+        if (patient == null) {
+            throw new ValidationException("Patient cannot be null.");
+        }
+        try {
+            patientRepository.update(patient);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to update patient: " + e.getMessage());
+        }
     }
 
     public Map<Integer, Appointment> getAppointments() {
-        return appointmentRepository.getAll();
-    }
-    public Map<Integer, Clinic> getClinics() {
-        return clinicRepository.getAll();
+        try {
+            return appointmentRepository.getAll();
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to retrieve appointments: " + e.getMessage());
+        }
     }
 
-    public Map<Integer, Doctor> getDoctors(){
-        return doctorRepository.getAll();
+    public Map<Integer, Clinic> getClinics() {
+        try {
+            return clinicRepository.getAll();
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to retrieve clinics: " + e.getMessage());
+        }
+    }
+
+    public Map<Integer, Doctor> getDoctors() {
+        try {
+            return doctorRepository.getAll();
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to retrieve doctors: " + e.getMessage());
+        }
     }
 
     public Map<Integer, Patient> getPatients() {
-        return patientRepository.getAll();
+        try {
+            return patientRepository.getAll();
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to retrieve patients: " + e.getMessage());
+        }
     }
+
     public Map<Integer, Specialization> getSpecializations() {
-        return specializationRepository.getAll();
+        try {
+            return specializationRepository.getAll();
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to retrieve specializations: " + e.getMessage());
+        }
     }
+
     public Map<Integer, Medication> getMedications() {
-        return medicationRepository.getAll();
+        try {
+            return medicationRepository.getAll();
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to retrieve medications: " + e.getMessage());
+        }
     }
 
-    public Clinic getClinicById(int id){
-        return clinicRepository.getById(id);
+    public List<Clinic> findNearbyClinics(String address) {
+        if (address == null || address.isEmpty()) {
+            throw new ValidationException("Address cannot be null or empty.");
+        }
+        try {
+            return new ArrayList<>(clinicRepository.getAll().values());
+        } catch (Exception e) {
+            throw new BusinessLogicException("Failed to find nearby clinics: " + e.getMessage());
+        }
     }
 
-    public Doctor getDoctorById(int id){
-        return doctorRepository.getById(id);
+//    public List<Doctor> findDoctorsBySpecialization(String specializationName) {
+//        if (specializationName == null || specializationName.isEmpty()) {
+//            throw new ValidationException("Specialization name cannot be null or empty.");
+//        }
+//        try {
+//            return doctorRepository.getAll().values().stream()
+//                    .filter(doctor -> doctor.getSpecializations().stream()
+//                            .anyMatch(spec -> spec.getName().equalsIgnoreCase(specializationName)))
+//                    .collect(Collectors.toList());
+//        } catch (Exception e) {
+//            throw new BusinessLogicException("Failed to find doctors by specialization: " + e.getMessage());
+//        }
+//    }
+
+    public List<Appointment> getDoctorAppointments(int doctorId) {
+        try {
+            return appointmentRepository.getAll().values().stream()
+                    .filter(appointment -> appointment.getDoctor().getId() == doctorId)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to retrieve appointments for doctor with ID " + doctorId + ": " + e.getMessage());
+        }
+    }
+
+    public List<Appointment> getPatientAppointments(int patientId) {
+        try {
+            return appointmentRepository.getAll().values().stream()
+                    .filter(appointment -> appointment.getPatient().getId() == patientId)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to retrieve appointments for patient with ID " + patientId + ": " + e.getMessage());
+        }
     }
 
     public Patient getPatientById(int id) {
-        return patientRepository.getById(id);
-    }
-
-
-    public List<Clinic> findNearbyClinics(String address) {
-        // Implement logic to find clinics near the address
-        // Placeholder for now:
-        return new ArrayList<>(clinicRepository.getAll().values());
-
-
+        try {
+            Patient patient = patientRepository.getById(id);
+            if (patient == null) {
+                throw new EntityNotFoundException("Patient with ID " + id + " not found.");
+            }
+            return patient;
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to retrieve patient: " + e.getMessage());
+        }
     }
 
     public List<Doctor> findDoctorsBySpecialization(String specializationName) {
-        return doctorRepository.getAll().values().stream()
-                .filter(doctor -> doctor.getSpecialization().equalsIgnoreCase(specializationName))
-                .toList();
+        if (specializationName == null || specializationName.isEmpty()) {
+            throw new ValidationException("Specialization name cannot be null or empty.");
+        }
+        try {
+            List<Doctor> filteredDoctors = doctorRepository.getAll().values().stream()
+                    .filter(doctor -> doctor.getSpecialization().equalsIgnoreCase(specializationName)) // Compare specialization name
+                    .collect(Collectors.toList());
+
+            if (filteredDoctors.isEmpty()) {
+                throw new EntityNotFoundException("No doctors found with specialization: " + specializationName);
+            }
+
+            return filteredDoctors;
+        } catch (Exception e) {
+            throw new BusinessLogicException("Error filtering doctors by specialization: " + e.getMessage());
+        }
     }
 
-    public List<Medication> getMedicationsForPatient(Patient patient) {
-        return medicationRepository.getAll().values().stream().toList();
+    public List<Appointment> sortAppointmentsByDoctorAndDate() {
+        try {
+            List<Appointment> sortedAppointments = appointmentRepository.getAll().values().stream()
+                    .sorted(Comparator
+                            .comparing((Appointment a) -> a.getDoctor().getLastName())
+                            .thenComparing(Appointment::getDateTime)
+                    )
+                    .collect(Collectors.toList());
+
+            if (sortedAppointments.isEmpty()) {
+                throw new EntityNotFoundException("No appointments found to sort.");
+            }
+
+            return sortedAppointments;
+        } catch (Exception e) {
+            throw new BusinessLogicException("Error sorting appointments by doctor and date: " + e.getMessage());
+        }
+    }
+
+    public List<Appointment> filterFutureAppointments() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+
+        try {
+            List<Appointment> futureAppointments = appointmentRepository.getAll().values().stream()
+                    .filter(appointment -> {
+                        try {
+                            LocalDateTime appointmentDateTime = LocalDateTime.parse(appointment.getDateTime(), formatter);
+                            return appointmentDateTime.isAfter(now);
+                        } catch (DateTimeParseException e) {
+                            throw new ValidationException("Invalid date format for appointment: " + appointment.getDateTime());
+                        }
+                    })
+                    .sorted(Comparator.comparing(appointment -> LocalDateTime.parse(appointment.getDateTime(), formatter)))
+                    .collect(Collectors.toList());
+
+            if (futureAppointments.isEmpty()) {
+                throw new EntityNotFoundException("No future appointments found.");
+            }
+
+            return futureAppointments;
+        } catch (ValidationException | EntityNotFoundException e) {
+            throw e; // Re-throw known exceptions to provide meaningful error messages.
+        } catch (Exception e) {
+            throw new BusinessLogicException("Error filtering future appointments: " + e.getMessage());
+        }
     }
 
     public boolean validateDateTime(String dateTime) {
@@ -196,81 +432,14 @@ public class Service {
             LocalDateTime.parse(dateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
             return true;
         } catch (DateTimeParseException e) {
-            return false;
+            throw new ValidationException("Date Time is incorrect formatted");
+//            return false;
         }
     }
 
 
 
-    public boolean createAppointment(Patient patient, Doctor doctor, String dateTime, String reason) {
-        try {
-            LocalDateTime appointmentTime = LocalDateTime.parse(dateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-            Appointment appointment = new Appointment(appointmentTime, patient, doctor,  reason);
-            addAppointment(appointment); // Add to the repository
-            return true;
-        } catch (Exception e) {
-            System.out.println("Error creating appointment: " + e.getMessage());
-            return false;
-        }
-    }
 
-    public List<Doctor> filterDoctorsBySpecialization(String specializationName) {
-        return doctorRepository.getAll().values().stream()
-                .filter(doctor -> doctor.getSpecialization().equalsIgnoreCase(specializationName)) // Comparăm numele specializării
-                .collect(Collectors.toList());
-    }
-
-
-
-    public List<Appointment> filterAppointmentsByDate(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-
-        return appointmentRepository.getAll().values().stream()
-                .filter(appointment -> {
-                    try {
-                        LocalDateTime dateTime = LocalDateTime.parse(appointment.getDateTime(), formatter);
-                        return dateTime.toLocalDate().equals(date);
-                    } catch (Exception e) {
-                        System.out.println("Error parsing date for appointment: " + appointment);
-                        return false;
-                    }
-                })
-                .collect(Collectors.toList());
-    }
-
-
-
-
-    public List<Appointment> sortAppointmentsByDoctorAndDate() {
-        return appointmentRepository.getAll().values().stream()
-                .sorted(Comparator
-                        .comparing((Appointment a) -> a.getDoctor().getLastName())
-                        .thenComparing(Appointment::getDateTime)
-                )
-                .collect(Collectors.toList());
-    }
-
-    public List<Appointment> sortAppointmentsByDate(boolean ascending) {
-        return appointmentRepository.getAll().values().stream()
-                .sorted(ascending
-                        ? Comparator.comparing(Appointment::getDateTime)
-                        : Comparator.comparing(Appointment::getDateTime).reversed())
-                .collect(Collectors.toList());
-    }
-
-    public List<Appointment> filterFutureAppointments() {
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-
-        return appointmentRepository.getAll().values().stream()
-                .filter(appointment -> {
-                    LocalDateTime appointmentDateTime = LocalDateTime.parse(appointment.getDateTime(), formatter);
-                    return appointmentDateTime.isAfter(now);
-                })
-                .sorted(Comparator.comparing(appointment -> LocalDateTime.parse(appointment.getDateTime(), formatter)))
-                .collect(Collectors.toList());
-    }
 
 
 }
-

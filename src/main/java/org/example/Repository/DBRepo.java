@@ -36,7 +36,7 @@ public class DBRepo<T extends Identifiable> implements IRepository<T> {
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
-            e.printStackTrace(); // Print stack trace for debugging
+            //e.printStackTrace(); // Print stack trace for debugging
         } finally {
             session.close();
         }
@@ -51,7 +51,7 @@ public class DBRepo<T extends Identifiable> implements IRepository<T> {
             }
             return entity;
         } catch (Exception e) {
-            e.printStackTrace(); // Log the error for debugging purposes
+            //e.printStackTrace(); // Log the error for debugging purposes
             throw new RuntimeException("Error retrieving entity with ID " + id, e); // Throw a descriptive exception
         }
     }
@@ -66,7 +66,7 @@ public class DBRepo<T extends Identifiable> implements IRepository<T> {
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
-            e.printStackTrace(); // Print stack trace for debugging
+            //e.printStackTrace(); // Print stack trace for debugging
         } finally {
             session.close();
         }
@@ -84,7 +84,7 @@ public class DBRepo<T extends Identifiable> implements IRepository<T> {
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
-            e.printStackTrace(); // Print stack trace for debugging
+            //e.printStackTrace(); // Print stack trace for debugging
         } finally {
             session.close();
         }
@@ -98,7 +98,7 @@ public class DBRepo<T extends Identifiable> implements IRepository<T> {
             // Convert the list of entities to a map by their ID
             return resultList.stream().collect(Collectors.toMap(Identifiable::getId, entity -> entity));
         } catch (Exception e) {
-            e.printStackTrace(); // Print stack trace for debugging
+            //e.printStackTrace(); // Print stack trace for debugging
             return null; // Return null in case of an error
         } finally {
             session.close();
