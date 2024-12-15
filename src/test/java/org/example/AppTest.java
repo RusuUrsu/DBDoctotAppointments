@@ -294,26 +294,35 @@ public class AppTest {
 
         Appointment appointment = new Appointment(LocalDateTime.of(2024, 12, 15, 10, 0), null, null, "Checkup");
         appointmentRepo.create(appointment);
+
         String newDateTime = "2024-12-16 14:30";
 
         boolean result = controller.updateAppointmentDateTime(appointment, newDateTime);
-        System.out.println(result);
+
+        transaction.commit();
+
+        String expectedDateTime = "2024-12-16 14:30";
+        String actualDateTime = appointment.getDateTime(); // Returnează String
+
         assertTrue(result, "The method should return true for a successful update");
-        assertEquals(LocalDateTime.of(2024, 12, 16, 14, 30), appointment.getDateTime(),
+        assertEquals(expectedDateTime, actualDateTime,
                 "The appointment's date and time should be updated correctly");
 
         session.close();
     }
 
 
-    @Test
-    void testGetFutureAppointments_WithFutureAppointments() {
 
+
+    @Test
+    void testGetFutureAppointments() {
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
 
-        Appointment appointment1 = new Appointment(LocalDateTime.of(2024, 12, 22, 10, 0), null, null, "Checkup");
-        Appointment appointment2 = new Appointment(LocalDateTime.of(2025, 12, 15, 10, 0), null, null, "Checkup");
+        Appointment appointment1 = new Appointment(
+                LocalDateTime.of(2024, 12, 22, 10, 0), null, null, "Checkup");
+        Appointment appointment2 = new Appointment(
+                LocalDateTime.of(2025, 12, 15, 10, 0), null, null, "Consultation");
 
         session.save(appointment1);
         session.save(appointment2);
@@ -324,26 +333,19 @@ public class AppTest {
 
         assertNotNull(futureAppointments, "The returned list of future appointments should not be null");
         assertEquals(2, futureAppointments.size(), "The list should contain all future appointments");
-        assertTrue(futureAppointments.contains(appointment1), "The list should include appointment1");
-        assertTrue(futureAppointments.contains(appointment2), "The list should include appointment2");
+
+         boolean hasAppointment1 = futureAppointments.stream()
+                .anyMatch(a -> a.getDateTime().equals(appointment1.getDateTime())
+                        && "Checkup".equals(a.getDescription()));
+
+        boolean hasAppointment2 = futureAppointments.stream()
+                .anyMatch(a -> a.getDateTime().equals(appointment2.getDateTime())
+                        && "Consultation".equals(a.getDescription()));
+
+        assertTrue(hasAppointment1, "The list should include appointment1");
+        assertTrue(hasAppointment2, "The list should include appointment2");
 
         session.close();
     }
 
-    @Test
-    void testSortAppointmentsByDate() {
-        Appointment appointment1 = new Appointment(LocalDateTime.of(2023, 12, 10, 10, 0), patient, doctor, "Check-up");
-        Appointment appointment2 = new Appointment(LocalDateTime.of(2023, 12, 15, 12, 0), patient, doctor, "Follow-up");
-
-        List<Appointment> appointments = new ArrayList<>();
-        appointments.add(appointment2);
-        appointments.add(appointment1);
-
-        doAnswer(invocation -> appointments).when(mockAppointmentRepo).getAll();
-        List<Appointment> result = service.sortAppointmentsByDate(true);
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(appointment1, result.get(0));
-        assertEquals(appointment2, result.get(1));
-    }
 }

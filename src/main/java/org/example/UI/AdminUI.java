@@ -1,6 +1,7 @@
 package org.example.UI;
 
 import org.example.Controller.Controller;
+import org.example.Exceptions.ValidationException;
 import org.example.model.*;
 
 import java.time.LocalDate;
@@ -83,31 +84,35 @@ public class AdminUI {
     public void addDoctorToClinic() {
         Scanner sc = new Scanner(System.in);
 
-        // Enter doctor details
-        System.out.println("Enter Doctor first name: ");
-        String firstName = sc.nextLine();
-        System.out.println("Enter Doctor last name: ");
-        String lastName = sc.nextLine();
-        System.out.println("Enter specialization name: ");
-        String specializationName = sc.nextLine();
-        System.out.println("Enter clinic ID: ");
-        int clinicID = Integer.parseInt(sc.nextLine());
-        Clinic docClinic = controller.searchClinicById(clinicID);
-        Doctor doctor = new Doctor(docClinic,firstName, lastName, specializationName);
-        controller.addDoctor(doctor);
+        try {
+            // Enter doctor details
+            System.out.println("Enter Doctor first name: ");
+            String firstName = sc.nextLine();
+            System.out.println("Enter Doctor last name: ");
+            String lastName = sc.nextLine();
+            System.out.println("Enter specialization name: ");
+            String specializationName = sc.nextLine();
 
-        // Display clinics and select one
-        System.out.println("Available Clinics:");
-        controller.getService().getClinics().values().forEach(System.out::println);
-        System.out.println("Enter Clinic ID to assign the doctor: ");
-        int clinicId = sc.nextInt();
-        Clinic clinic = controller.searchClinicById(clinicId);
+            // Validăm ID-ul clinicii
+            System.out.println("Enter clinic ID: ");
+            if (!sc.hasNextInt()) {
+                sc.next(); // Consumăm inputul invalid
+                throw new ValidationException("Invalid Clinic ID. Please enter a numeric value.");
+            }
+            int clinicID = sc.nextInt();
+            sc.nextLine(); // Consumăm newline
 
-        if (clinic != null) {
-            clinic.addDoctor(doctor);
-            System.out.println("Doctor added to the clinic successfully.");
-        } else {
-            System.out.println("Invalid Clinic ID. Operation failed.");
+            Clinic docClinic = controller.searchClinicById(clinicID);
+            if (docClinic == null) {
+                throw new ValidationException("Clinic with the given ID does not exist.");
+            }
+
+            Doctor doctor = new Doctor(docClinic, firstName, lastName, specializationName);
+            controller.addDoctor(doctor);
+            System.out.println("Doctor added successfully to clinic: " + docClinic.getName());
+
+        } catch (ValidationException e) {
+            System.out.println("Validation error: " + e.getMessage());
         }
     }
 

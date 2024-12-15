@@ -1,5 +1,6 @@
 package org.example.Controller;
 
+import org.example.Exceptions.ValidationException;
 import org.example.model.*;
 import org.example.Service.Service;
 
@@ -85,19 +86,16 @@ public class Controller {
 
     public boolean updateAppointmentDateTime(Appointment appointment, String newDateTime) {
         if (newDateTime.isBlank()) {
-            return false; // No changes
+            throw new ValidationException("The new date and time cannot be blank.");
         }
         try {
-            // Define the date-time format
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             LocalDateTime parsedDateTime = LocalDateTime.parse(newDateTime, formatter);
-
-            // Update the appointment's date and time
             appointment.setDateTime(parsedDateTime);
-            service.updateAppointment(appointment); // Persist the change
-            return true; // Successfully updated
+            service.updateAppointment(appointment);
+            return true;
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid date and time format. Use 'yyyy-MM-dd HH:mm'.");
+            throw new ValidationException("Invalid date and time format. Use 'yyyy-MM-dd HH:mm'.");
         }
     }
 

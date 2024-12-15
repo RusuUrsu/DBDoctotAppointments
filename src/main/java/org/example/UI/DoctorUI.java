@@ -1,6 +1,7 @@
 package org.example.UI;
 
 import org.example.Controller.Controller;
+import org.example.Exceptions.ValidationException;
 import org.example.model.*;
 
 import java.util.List;
@@ -41,15 +42,24 @@ public class DoctorUI {
 
     public Doctor login() {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Enter your doctor ID to log in:");
-        int id = Integer.parseInt(sc.nextLine());
-        Doctor doctor = controller.getDoctorById(id);
-        if (doctor != null) {
-            System.out.println("Login successful. Welcome, Dr. " + doctor.getFirstName() + " " + doctor.getLastName() + "!");
-        } else {
-            System.out.println("Invalid ID. Please try again.");
+        try {
+            System.out.println("Enter your doctor ID to log in:");
+            if (!sc.hasNextInt()) {
+                sc.next();
+                throw new ValidationException("Invalid ID format. Please enter a numeric value.");
+            }
+            int id = Integer.parseInt(sc.nextLine());
+            Doctor doctor = controller.getDoctorById(id);
+            if (doctor != null) {
+                System.out.println("Login successful. Welcome, Dr. " + doctor.getFirstName() + " " + doctor.getLastName() + "!");
+                return doctor;
+            } else {
+                throw new ValidationException("Invalid doctor ID. Please try again.");
+            }
+        } catch (ValidationException e) {
+            System.out.println(e.getMessage());
+            return null;
         }
-        return doctor;
     }
 
     private void manageAppointments(Doctor doctor) {
@@ -70,8 +80,14 @@ public class DoctorUI {
         String choice = scanner.nextLine();
         if (choice.equalsIgnoreCase("yes")) {
             System.out.println("Enter the number of the appointment you want to edit:");
+            if (!scanner.hasNextInt()) {
+                scanner.next();
+                System.out.println("Invalid input. Please enter a valid number.");
+                return;
+            }
+
             int appointmentIndex = scanner.nextInt() - 1;
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine();
 
             if (appointmentIndex >= 0 && appointmentIndex < appointmentList.size()) {
                 Appointment appointment = appointmentList.get(appointmentIndex);
@@ -86,18 +102,20 @@ public class DoctorUI {
                     } else {
                         System.out.println("No changes were made to the appointment.");
                     }
-                } catch (IllegalArgumentException e) {
-                    System.out.println(e.getMessage()); // Display validation error to the user
+                } catch (ValidationException e) {
+                    System.out.println("Validation error: " + e.getMessage());
                 }
             } else {
-                System.out.println("Invalid selection.");
+                System.out.println("Invalid appointment number.");
             }
         }
+
     }
 
     private void managePatients(Doctor doctor) {
         Scanner scanner = new Scanner(System.in);
         List<Appointment> appointmentList = controller.getAppointmentsFromDoctor(doctor);
+
         if (appointmentList.isEmpty()) {
             System.out.println("No patients have appointments with you.");
             return;
@@ -110,25 +128,39 @@ public class DoctorUI {
 
         System.out.println("Would you like to prescribe medication to a patient? (yes/no)");
         String choice = scanner.nextLine();
-        if (choice.equalsIgnoreCase("yes")) {
-            System.out.println("Enter the ID of the patient to prescribe medication:");
-            int patientId = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
 
-            Patient patient = controller.getService().getPatientById(patientId);
-            if (patient != null) {
+        if (choice.equalsIgnoreCase("yes")) {
+            try {
+                System.out.println("Enter the ID of the patient to prescribe medication:");
+                if (!scanner.hasNextInt()) {
+                    scanner.next(); // Consumăm inputul invalid
+                    throw new ValidationException("Invalid input. Please enter a numeric ID.");
+                }
+
+                int patientId = scanner.nextInt();
+                scanner.nextLine();
+
+                Patient patient = controller.getService().getPatientById(patientId);
+                if (patient == null) {
+                    throw new ValidationException("No patient found with the given ID.");
+                }
+
                 System.out.println("Enter medication name:");
                 String medicationName = scanner.nextLine();
+
                 System.out.println("Enter dosage instructions:");
                 String dosage = scanner.nextLine();
 
                 Medication medication = new Medication(medicationName, dosage, patient);
-                controller.addMedication(medication); // Assuming the service stores this medication
-                System.out.println("Medication prescribed successfully to " + patient.getFirstName() + " " + patient.getLastName() + ".");
-            } else {
-                System.out.println("Invalid patient ID.");
+                controller.addMedication(medication);
+                System.out.println("Medication prescribed successfully to "
+                        + patient.getFirstName() + " " + patient.getLastName() + ".");
+
+            } catch (ValidationException e) {
+                System.out.println("Validation error: " + e.getMessage());
             }
         }
+
     }
 
     private void viewProfile(Doctor doctor) {

@@ -55,6 +55,10 @@ public class Appointment extends Identifiable implements Serializable {
         return this.reason;
     }
 
+    public LocalDateTime getDate() {
+        return dateTime;
+    }
+
     public void setReason(String reason) {
         this.reason = reason;
     }
@@ -73,5 +77,9 @@ public class Appointment extends Identifiable implements Serializable {
 
     public void setDoctor(Doctor doctor) {
         this.doctor = doctor;
+    }
+
+    public String getDescription() {
+        return reason;
     }
 }
