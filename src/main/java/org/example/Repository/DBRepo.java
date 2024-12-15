@@ -7,6 +7,7 @@ import org.example.model.Identifiable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class DBRepo<T extends Identifiable> implements IRepository<T> {
     private final SessionFactory sessionFactory;
     private final Class<T> entityType;
+    private final AtomicInteger idGenerator = new AtomicInteger(1);
 
     public DBRepo(SessionFactory sessionFactory, Class<T> entityType) {
         this.sessionFactory = sessionFactory;
@@ -28,6 +30,7 @@ public class DBRepo<T extends Identifiable> implements IRepository<T> {
     public void create(T entity) {
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
+        //entity.setId(idGenerator.getAndIncrement());
         try {
             session.save(entity); // Save new entity
             transaction.commit();
@@ -41,16 +44,18 @@ public class DBRepo<T extends Identifiable> implements IRepository<T> {
 
     @Override
     public T read(int id) {
-        Session session = sessionFactory.openSession();
-        try {
-            return session.get(entityType, id); // Fetch the entity by ID
-        } catch(Exception e){
-            e.printStackTrace(); // Print stack trace for debugging
-            return null; // Return null if entity is not found or there's an error
-        } finally {
-            session.close();
+        try (Session session = sessionFactory.openSession()) {
+            T entity = session.find(entityType, id); // Use session.find() for better handling of null results
+            if (entity == null) {
+                throw new IllegalArgumentException("Entity with ID " + id + " not found");
+            }
+            return entity;
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the error for debugging purposes
+            throw new RuntimeException("Error retrieving entity with ID " + id, e); // Throw a descriptive exception
         }
     }
+
 
     @Override
     public void update(T entity) {
